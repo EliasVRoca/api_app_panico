@@ -17,7 +17,7 @@ print("Setting up users for security testing...")
 admin_user, _ = User.objects.get_or_create(email='admin@admin.com')
 admin_user.is_staff = True
 admin_user.is_superuser = True
-admin_user.set_password('12345678')
+admin_user.set_password('admin')
 admin_user.save()
 
 normal_user, _ = User.objects.get_or_create(email='normal@test.com')
@@ -47,11 +47,11 @@ def fetch(url, data=None, token=None, method='GET'):
             return e.code, content
 
 print("\nFetching tokens...")
-status, admin_login = fetch(f"{auth_url}/login/", data={'email': 'admin@admin.com', 'password': '12345678'}, method='POST')
-admin_token = admin_login.get('access')
+status, admin_login = fetch(f"{auth_url}/login/", data={'username': 'admin@admin.com', 'password': 'admin'}, method='POST')
+admin_token = admin_login.get('access') if isinstance(admin_login, dict) else None
 
-status, normal_login = fetch(f"{auth_url}/login/", data={'email': 'normal@test.com', 'password': 'userpass123'}, method='POST')
-normal_token = normal_login.get('access')
+status, normal_login = fetch(f"{auth_url}/login/", data={'username': 'normal@test.com', 'password': 'userpass123'}, method='POST')
+normal_token = normal_login.get('access') if isinstance(normal_login, dict) else None
 
 # ==========================================
 # 2. RUNNING SECURITY TESTS

@@ -103,7 +103,7 @@ admin, _ = User.objects.update_or_create(
     email='admin@admin.com',
     defaults=dict(username='admin', is_staff=True, is_superuser=True, is_active=True)
 )
-admin.set_password('Admin1234!')
+admin.set_password('admin')
 admin.save()
 print(f"  Admin listo: admin@admin.com / admin")
 
@@ -130,14 +130,14 @@ print(f"  Usuario Premium listo: {PREM_EMAIL} / {PREM_USERNAME}  tier=premium")
 # ──────────────────────────────────────────────────────────────────────────────
 section("1. Login de Administrador (por username y por email)")
 
-admin_token = login('admin', 'Admin1234!')
+admin_token = login('admin', 'admin')
 if admin_token:
     ok("Login con username 'admin'")
 else:
     fail("Login con username 'admin'")
     sys.exit(1)
 
-admin_token_by_email = login('admin@admin.com', 'Admin1234!')
+admin_token_by_email = login('admin@admin.com', 'admin')
 if admin_token_by_email:
     ok("Login con email 'admin@admin.com'")
 else:
