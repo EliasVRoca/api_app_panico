@@ -1,5 +1,7 @@
 from rest_framework import viewsets
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 from .models import CustomUser
@@ -31,3 +33,17 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset           = CustomUser.objects.all()
     serializer_class   = UserSerializer
     permission_classes = [IsAdminUser]
+
+
+@extend_schema(
+    tags=['users'],
+    summary="Mi perfil",
+    description="Devuelve toda la información del usuario autenticado (excepto la contraseña).",
+    responses={200: UserSerializer},
+)
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
