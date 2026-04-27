@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: django_api
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      # Mantener la base de datos sqlite persistente entre reinicios
+      - ./db_new.sqlite3:/app/db_new.sqlite3
+      - ./staticfiles:/app/staticfiles
