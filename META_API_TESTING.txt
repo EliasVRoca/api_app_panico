@@ -1,0 +1,51 @@
+================================================================================
+REPORTE Y PLAN DE INTEGRACION: WHATSAPP META API
+================================================================================
+
+--------------------------------------------------------------------------------
+PARTE 1: REPORTE DE IMPLEMENTACION (WALKTHROUGH)
+--------------------------------------------------------------------------------
+
+He completado la integración del envío de mensajes reales a través de la API oficial de Meta WhatsApp. A continuación se detallan los cambios realizados.
+
+1. Configuración y Dependencias
+- Se agregó la librería `requests>=2.31.0` al archivo `requirements.txt` para manejar las peticiones HTTP a la API de Meta.
+- Se actualizaron los archivos `.env` (con variables vacías para que las llenes) y `config/settings.py` para cargar los valores de configuración de la API:
+  - META_WHATSAPP_TOKEN
+  - META_WHATSAPP_PHONE_ID
+  - META_WHATSAPP_TEMPLATE_NAME
+
+NOTA IMPORTANTE: Recuerda colocar tus credenciales reales en el archivo `.env` antes de realizar las pruebas.
+
+2. Lógica del Endpoint (views.py)
+El endpoint `api/panic/activate/` ha sido modificado exitosamente:
+- Recolección de datos: Obtiene el nombre completo del usuario y convierte las coordenadas en un enlace de Google Maps para incluirlo en la plantilla de WhatsApp.
+- Formateo de contactos: Limpia los números de teléfono de los contactos eliminando signos `+` o espacios, que es el formato esperado por Meta.
+- Petición a Meta API: Por cada contacto, el servidor ahora realiza un POST real a la URL `https://graph.facebook.com/v19.0/{PHONE_ID}/messages` utilizando el template y los dos parámetros requeridos: `{{1}}` (Nombre) y `{{2}}` (Ubicación).
+- Manejo de Respuestas:
+   - Si las peticiones son exitosas, se devuelve una confirmación de éxito.
+   - Si alguna petición falla (por ejemplo, número no válido o template no aprobado), el error no detiene el ciclo: se registra el error específico en la respuesta (el log de la alerta) y se continúa con el siguiente contacto.
+   - Si no hay credenciales configuradas en el entorno (útil si estás en local sin `.env` configurado), el código automáticamente hace un fallback a la simulación, retornando un mensaje simulado.
+
+Próximos pasos
+Como tu plantilla aún está en fase de aprobación, es posible que al hacer la petición a la API Meta retorne un error indicando que el template no está verificado (a menos que estés mandándolo a números de prueba autorizados en el panel de Meta). Una vez tu plantilla sea aprobada, este código funcionará de forma transparente.
+
+--------------------------------------------------------------------------------
+PARTE 2: PLAN ORIGINAL DE IMPLEMENTACION
+--------------------------------------------------------------------------------
+
+El objetivo es modificar el endpoint `api/panic/activate/` para que envíe mensajes reales de WhatsApp utilizando la API oficial de Meta (Cloud API), usando una plantilla (template) predefinida con dos parámetros: el nombre del usuario y su ubicación.
+
+Configuraciones Necesarias:
+1. Token de acceso de la API de WhatsApp Meta.
+2. Identificador del número de teléfono (Phone Number ID).
+3. Nombre exacto de la plantilla (Template Name) que se ha aprobado en Meta.
+4. Idioma de la plantilla (por ejemplo, `es` o `es_LA`).
+
+Estas credenciales se agregan al archivo `.env` local y a las configuraciones de Django.
+
+Plan de Verificación Manual (Testing):
+- Configurar las variables de entorno de Meta en el archivo `.env`.
+- Realizar una solicitud POST al endpoint `/api/panic/activate/` utilizando un usuario autenticado con al menos un contacto configurado (asegurándose de que el número de teléfono del contacto tenga el formato correcto para WhatsApp).
+- Verificar que el contacto reciba un mensaje real de WhatsApp con la plantilla correcta y los datos esperados.
+- Verificar la respuesta de la API local (JSON indicando éxito y detalles).
